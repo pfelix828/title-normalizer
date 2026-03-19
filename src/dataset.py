@@ -13,7 +13,8 @@ def tokenize(title: str) -> list[str]:
     Handles abbreviations, punctuation, and extra whitespace.
     """
     title = title.lower().strip()
-    title = re.sub(r"[&/–]", " ", title)
+    title = title.replace("\t", " ")
+    title = re.sub(r"[&/–—]", " ", title)
     title = re.sub(r"[^\w\s.-]", "", title)
     title = re.sub(r"\s+", " ", title)
     tokens = title.split()
