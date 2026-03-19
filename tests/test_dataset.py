@@ -21,6 +21,12 @@ class TestTokenize:
     def test_strips_whitespace(self):
         assert tokenize("  Senior Engineer  ") == ["senior", "engineer"]
 
+    def test_handles_tabs(self):
+        assert tokenize("Dir\tof Engineering") == ["dir", "of", "engineering"]
+
+    def test_handles_em_dash(self):
+        assert tokenize("VP \u2014 Engineering") == ["vp", "engineering"]
+
 
 class TestVocabulary:
     def test_special_tokens(self):
