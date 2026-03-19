@@ -61,9 +61,22 @@ python -m src.baseline
 # Train PyTorch model
 python -m src.train
 
+# Run full pipeline (generate + train both models)
+python -m src
+
 # Run tests
 pytest tests/ -v
 ```
+
+## Example Predictions
+
+| Input Title | Predicted Seniority | Predicted Function |
+|-------------|--------------------|--------------------|
+| `Sr. Dir. Mktg (EMEA)` | senior_director | marketing |
+| `sofware eng III` | senior | engineering |
+| `VP Sales & Biz Dev` | vp | sales |
+| `Manger, Product` | manager | product |
+| `CHIEF REVENUE OFFICER` | c_suite | sales |
 
 ## Project Structure
 
