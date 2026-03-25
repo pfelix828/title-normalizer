@@ -9,7 +9,7 @@ from src.predict import predict_title, predict_batch
 def _make_trained_model():
     """Build a small model with vocab for testing."""
     records = generate_dataset(n_samples=200, seed=42)
-    train_ds, _, vocab = build_vocab_and_datasets(records, train_ratio=0.8, seed=42)
+    train_ds, _, _, vocab = build_vocab_and_datasets(records, train_ratio=0.70, val_ratio=0.15, seed=42)
     model = BiLSTMClassifier(
         vocab_size=len(vocab), embed_dim=16, hidden_dim=32,
         num_seniority=10, num_function=10,

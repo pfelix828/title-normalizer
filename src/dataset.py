@@ -96,30 +96,37 @@ class TitleDataset(Dataset):
 
 def build_vocab_and_datasets(
     records: list[dict],
-    train_ratio: float = 0.8,
+    train_ratio: float = 0.70,
+    val_ratio: float = 0.15,
     max_length: int = 12,
     min_freq: int = 2,
     seed: int = 42,
-) -> tuple[TitleDataset, TitleDataset, Vocabulary]:
+) -> tuple[TitleDataset, TitleDataset, TitleDataset, Vocabulary]:
     """Split records and build vocabulary from training set only.
 
+    Uses a 70/15/15 train/val/test split so that early stopping monitors the
+    validation set and final metrics are reported on a truly held-out test set.
+
     Returns:
-        (train_dataset, test_dataset, vocabulary)
+        (train_dataset, val_dataset, test_dataset, vocabulary)
     """
     import random
     rng = random.Random(seed)
     shuffled = list(records)
     rng.shuffle(shuffled)
 
-    split = int(len(shuffled) * train_ratio)
-    train_records = shuffled[:split]
-    test_records = shuffled[split:]
+    train_end = int(len(shuffled) * train_ratio)
+    val_end = int(len(shuffled) * (train_ratio + val_ratio))
+    train_records = shuffled[:train_end]
+    val_records = shuffled[train_end:val_end]
+    test_records = shuffled[val_end:]
 
     # Build vocab from training data only
     train_tokens = [tokenize(r["raw_title"]) for r in train_records]
     vocab = Vocabulary(min_freq=min_freq).build(train_tokens)
 
     train_ds = TitleDataset(train_records, vocab, max_length)
+    val_ds = TitleDataset(val_records, vocab, max_length)
     test_ds = TitleDataset(test_records, vocab, max_length)
 
-    return train_ds, test_ds, vocab
+    return train_ds, val_ds, test_ds, vocab

@@ -13,8 +13,17 @@ def small_dataset():
 
 @pytest.fixture
 def train_test_vocab(small_dataset):
-    """Build train/test datasets and vocabulary."""
-    train_ds, test_ds, vocab = build_vocab_and_datasets(
-        small_dataset, train_ratio=0.8, seed=42
+    """Build train/val/test datasets and vocabulary."""
+    train_ds, val_ds, test_ds, vocab = build_vocab_and_datasets(
+        small_dataset, train_ratio=0.70, val_ratio=0.15, seed=42
     )
     return train_ds, test_ds, vocab
+
+
+@pytest.fixture
+def train_val_test_vocab(small_dataset):
+    """Build train/val/test datasets and vocabulary (full 4-tuple)."""
+    train_ds, val_ds, test_ds, vocab = build_vocab_and_datasets(
+        small_dataset, train_ratio=0.70, val_ratio=0.15, seed=42
+    )
+    return train_ds, val_ds, test_ds, vocab

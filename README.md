@@ -24,7 +24,7 @@ Manual normalization doesn't scale. Rule-based approaches break on edge cases. T
 | **BiLSTM** (PyTorch) | 94.5% | 92.6% | 88.0% |
 | TF-IDF + LogReg (baseline) | 93.3% | 93.3% | 87.6% |
 
-*Trained on 16,000 synthetic titles, evaluated on 4,000 held-out. Synthetic data includes realistic CRM noise: truncation, misspellings, geo/team qualifiers, credential suffixes, encoding artifacts, word reordering, and separator variation.*
+*Trained on 14,000 synthetic titles, validated on 3,000, evaluated on 3,000 held-out test titles not used during training or early stopping. Synthetic data includes realistic CRM noise: truncation, misspellings, geo/team qualifiers, credential suffixes, encoding artifacts, word reordering, and separator variation.*
 
 ## Architecture
 
@@ -122,8 +122,9 @@ Noise level is configurable (0.0 = clean canonical titles, 1.0 = full variation)
 
 1. **Baseline first**: TF-IDF (1-2 grams) + Logistic Regression establishes a performance floor
 2. **Neural approach**: Word embeddings learned from scratch → BiLSTM captures sequential patterns → multi-task heads share representations between seniority and function prediction
-3. **Early stopping**: Monitors validation loss with patience=5 to prevent overfitting
-4. **Per-class evaluation**: Precision, recall, and F1 for every seniority level and function category
+3. **Proper train/val/test split**: 70/15/15 split ensures early stopping uses the validation set and final metrics are reported on a truly held-out test set
+4. **Early stopping**: Monitors validation loss with patience=5 to prevent overfitting
+5. **Per-class evaluation**: Precision, recall, and F1 for every seniority level and function category
 
 ## Production Considerations
 

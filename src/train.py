@@ -22,7 +22,8 @@ class TrainConfig:
     n_samples: int = 20000
     noise_level: float = 1.0
     max_length: int = 12
-    train_ratio: float = 0.8
+    train_ratio: float = 0.70
+    val_ratio: float = 0.15
 
     # Model
     model_type: str = "bilstm"  # "bilstm" or "cnn"
@@ -159,17 +160,19 @@ def train(config: Optional[TrainConfig] = None) -> dict:
     )
 
     # Build datasets
-    train_ds, test_ds, vocab = build_vocab_and_datasets(
+    train_ds, val_ds, test_ds, vocab = build_vocab_and_datasets(
         records,
         train_ratio=config.train_ratio,
+        val_ratio=config.val_ratio,
         max_length=config.max_length,
         seed=config.seed,
     )
     print(f"Vocabulary size: {len(vocab)}")
-    print(f"Train: {len(train_ds)} | Test: {len(test_ds)}")
+    print(f"Train: {len(train_ds)} | Val: {len(val_ds)} | Test: {len(test_ds)}")
 
     # Dataloaders
     train_loader = DataLoader(train_ds, batch_size=config.batch_size, shuffle=True)
+    val_loader = DataLoader(val_ds, batch_size=config.batch_size)
     test_loader = DataLoader(test_ds, batch_size=config.batch_size)
 
     # Model
@@ -196,7 +199,7 @@ def train(config: Optional[TrainConfig] = None) -> dict:
         t0 = time.time()
 
         train_loss = train_epoch(model, train_loader, optimizer, criterion, config.device)
-        val_loss, sen_acc, func_acc = validate(model, test_loader, criterion, config.device)
+        val_loss, sen_acc, func_acc = validate(model, val_loader, criterion, config.device)
 
         elapsed = time.time() - t0
         print(f"{epoch:>5} {train_loss:>11.4f} {val_loss:>9.4f} {sen_acc:>7.1%} {func_acc:>8.1%} {elapsed:>5.1f}s")
@@ -229,6 +232,7 @@ def train(config: Optional[TrainConfig] = None) -> dict:
         "config": config,
         "metrics": metrics,
         "train_dataset": train_ds,
+        "val_dataset": val_ds,
         "test_dataset": test_ds,
     }
 

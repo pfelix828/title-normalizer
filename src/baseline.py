@@ -16,10 +16,15 @@ FUNCTION_NAMES = {v: k for k, v in FUNCTIONS.items()}
 def train_baseline(
     n_samples: int = 20000,
     noise_level: float = 1.0,
-    train_ratio: float = 0.8,
+    train_ratio: float = 0.70,
+    val_ratio: float = 0.15,
     seed: int = 42,
 ) -> dict:
     """Train TF-IDF + Logistic Regression baselines for both tasks.
+
+    Uses a 70/15/15 train/val/test split consistent with the neural models.
+    The baseline has no early stopping, so the val set is unused here, but
+    the split keeps the test set identical across all models.
 
     Returns dict with models, vectorizer, and metrics.
     """
@@ -31,9 +36,11 @@ def train_baseline(
     shuffled = list(records)
     rng.shuffle(shuffled)
 
-    split = int(len(shuffled) * train_ratio)
-    train_records = shuffled[:split]
-    test_records = shuffled[split:]
+    train_end = int(len(shuffled) * train_ratio)
+    val_end = int(len(shuffled) * (train_ratio + val_ratio))
+    train_records = shuffled[:train_end]
+    # val_records not used for logistic regression (no early stopping)
+    test_records = shuffled[val_end:]
 
     train_titles = [r["raw_title"] for r in train_records]
     test_titles = [r["raw_title"] for r in test_records]

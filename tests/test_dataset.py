@@ -56,9 +56,9 @@ class TestVocabulary:
 
 
 class TestTitleDataset:
-    def test_length(self, train_test_vocab):
-        train_ds, test_ds, _ = train_test_vocab
-        assert len(train_ds) + len(test_ds) == 500
+    def test_length(self, train_val_test_vocab):
+        train_ds, val_ds, test_ds, _ = train_val_test_vocab
+        assert len(train_ds) + len(val_ds) + len(test_ds) == 500
 
     def test_item_shape(self, train_test_vocab):
         train_ds, _, _ = train_test_vocab
