@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Title Normalizer — live demo</title>
+<meta name="description" content="A multi-task neural network that turns messy CRM job titles into standardized seniority and function, running entirely in your browser.">
+<style>
+  :root {
+    --bg: #0f1117; --card: #181b24; --border: #2a2e3b;
+    --text: #e8eaf0; --muted: #9aa1b2; --accent: #6c8cff;
+    --good: #4ade80; --warn: #fbbf24; --bar-bg: #262a36;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 40px 20px 60px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 28px; }
+  .sub a { color: var(--accent); text-decoration: none; }
+  .sub a:hover { text-decoration: underline; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+  input[type="text"] {
+    width: 100%; padding: 13px 14px; font-size: 17px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--bg); color: var(--text); outline: none;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+  .examples { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    border-radius: 999px; padding: 5px 12px; font-size: 13px; cursor: pointer;
+  }
+  .chip:hover { color: var(--text); border-color: var(--accent); }
+  .results { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 560px) { .results { grid-template-columns: 1fr; } }
+  .panel h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
+  .pred { font-size: 22px; font-weight: 650; margin-bottom: 4px; }
+  .conf { color: var(--muted); font-size: 14px; margin-bottom: 14px; }
+  .bar { height: 6px; background: var(--bar-bg); border-radius: 3px; overflow: hidden; margin: 6px 0 10px; }
+  .bar > div { height: 100%; background: var(--accent); border-radius: 3px; width: 0; transition: width .25s; }
+  .alt { display: flex; justify-content: space-between; font-size: 13.5px; color: var(--muted); padding: 2.5px 0; }
+  .tokens { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 6px; }
+  .tok { font: 13px ui-monospace, Menlo, monospace; background: var(--bar-bg); border-radius: 6px; padding: 3px 8px; }
+  .tok.unk { color: var(--warn); }
+  .tok-label { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  .status { color: var(--muted); font-size: 14px; }
+  .note { color: var(--muted); font-size: 13.5px; line-height: 1.6; }
+  .note strong { color: var(--text); font-weight: 600; }
+  .paritybadge { font-size: 13px; color: var(--good); }
+  .paritybadge.fail { color: var(--warn); }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Title Normalizer</h1>
+  <p class="sub">
+    A multi-task neural network that reads a messy CRM job title and predicts standardized
+    seniority and function. The model runs entirely in your browser — nothing you type is sent anywhere.
+    &nbsp;·&nbsp; <a href="https://github.com/pfelix828/title-normalizer">Code on GitHub</a>
+  </p>
+
+  <div class="card">
+    <input id="title-input" type="text" autocomplete="off" spellcheck="false"
+           placeholder="Type a job title, e.g. Sr. Dir. of Eng, EMEA">
+    <div class="examples" id="examples"></div>
+  </div>
+
+  <div class="card hidden" id="result-card">
+    <div class="results">
+      <div class="panel">
+        <h2>Seniority</h2>
+        <div class="pred" id="sen-pred"></div>
+        <div class="bar"><div id="sen-bar"></div></div>
+        <div class="conf" id="sen-conf"></div>
+        <div id="sen-alts"></div>
+      </div>
+      <div class="panel">
+        <h2>Function</h2>
+        <div class="pred" id="func-pred"></div>
+        <div class="bar"><div id="func-bar"></div></div>
+        <div class="conf" id="func-conf"></div>
+        <div id="func-alts"></div>
+      </div>
+    </div>
+    <div class="tok-label">How the model sees it (<span style="color:var(--warn)">highlighted</span> = word not in training vocabulary):</div>
+    <div class="tokens" id="tokens"></div>
+  </div>
+
+  <div class="card">
+    <p class="status" id="status">Loading model…</p>
+    <p class="note">
+      <strong>About this demo.</strong> The model is a multi-task convolutional network with two
+      classification heads, 94k parameters, exported to ONNX and running locally via onnxruntime-web.
+      It was trained on 14,000 synthetic job titles with realistic CRM noise and measures
+      <strong>94.3%</strong> seniority accuracy and <strong>93.1%</strong> function accuracy on a
+      held-out test set of 3,000 titles. Synthetic training data means real-world accuracy would be
+      lower until retrained on labeled CRM data; the pipeline, not the headline number, is the point.
+    </p>
+    <p class="note paritybadge" id="parity"></p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.min.js"></script>
+<script src="tokenizer.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

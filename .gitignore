@@ -1,9 +1,11 @@
 # Data
 data/*.csv
 
-# Models
+# Models (shipped demo checkpoints are committed; other experiments are not)
 models/*.pt
 models/*.pth
+!models/cnn.pt
+!models/bilstm.pt
 
 # Python
 __pycache__/

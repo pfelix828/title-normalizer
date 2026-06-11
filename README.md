@@ -1,5 +1,7 @@
 # Job Title Normalizer
 
+**Live demo: [pfelix828.github.io/title-normalizer](https://pfelix828.github.io/title-normalizer/)** — the trained model runs in your browser via ONNX; type a messy title and watch it classify.
+
 A multi-task PyTorch classifier that normalizes messy CRM job titles into standardized **seniority levels** and **job functions**. Built to solve a real problem in B2B marketing: contact databases contain thousands of title variations that need to be standardized for segmentation, targeting, and buying group analysis.
 
 ## The Problem
@@ -20,11 +22,11 @@ Manual normalization doesn't scale. Rule-based approaches break on edge cases. T
 
 | Model | Seniority Acc | Function Acc | Both Correct |
 |-------|:---:|:---:|:---:|
-| **CNN** (PyTorch) | 95.2% | 93.0% | 89.0% |
-| **BiLSTM** (PyTorch) | 94.5% | 92.6% | 88.0% |
-| TF-IDF + LogReg (baseline) | 93.3% | 93.3% | 87.6% |
+| **CNN** (PyTorch) — serves the live demo | 94.3% | 93.1% | 88.5% |
+| **BiLSTM** (PyTorch) | 93.6% | 92.7% | 87.4% |
+| TF-IDF + LogReg (baseline) | 92.7% | 93.6% | 87.3% |
 
-*Trained on 14,000 synthetic titles, validated on 3,000, evaluated on 3,000 held-out test titles not used during training or early stopping. Synthetic data includes realistic CRM noise: truncation, misspellings, geo/team qualifiers, credential suffixes, encoding artifacts, word reordering, and separator variation.*
+*Trained on 14,000 synthetic titles, validated on 3,000, evaluated on 3,000 held-out test titles not used during training or early stopping. Numbers are measured on the exact checkpoints saved in this repo; the CNN row is the model the live demo serves, exported to ONNX with verified parity — identical predictions on all 3,000 test rows. Synthetic data includes realistic CRM noise: truncation, misspellings, geo/team qualifiers, credential suffixes, encoding artifacts, word reordering, and separator variation.*
 
 ## Architecture
 
